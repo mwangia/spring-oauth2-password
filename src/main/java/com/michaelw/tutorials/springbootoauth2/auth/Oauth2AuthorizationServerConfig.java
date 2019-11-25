@@ -1,7 +1,6 @@
 package com.michaelw.tutorials.springbootoauth2.auth;
 
 import com.michaelw.tutorials.springbootoauth2.enums.UserRole;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,10 +21,6 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 
 /**
  * @author mwangia on 11/20/19.
@@ -53,9 +47,6 @@ public class Oauth2AuthorizationServerConfig extends AuthorizationServerConfigur
     @Value("${keystore.password}")
     private String keystorePassword;
 
-    @Value("${publickey.filename}")
-    private String publicKeyFilename;
-
     @Value("${keystore.filename}")
     private String keystoreFilename;
 
@@ -74,13 +65,6 @@ public class Oauth2AuthorizationServerConfig extends AuthorizationServerConfigur
         KeyStoreKeyFactory keyStoreKeyFactory = new KeyStoreKeyFactory(new ClassPathResource(keystoreFilename),
                 keystorePassword.toCharArray());
         jwtAccessTokenConverter.setKeyPair(keyStoreKeyFactory.getKeyPair(keystoreAlias));
-        Resource resource = new ClassPathResource(publicKeyFilename);
-        try (InputStream inputStream = resource.getInputStream()) {
-            String publicKey = IOUtils.toString(inputStream, Charset.forName("UTF-8"));
-            jwtAccessTokenConverter.setVerifierKey(publicKey);
-        } catch (IOException exc) {
-            log.error("Error fetching public key", exc);
-        }
         return jwtAccessTokenConverter;
     }
 
